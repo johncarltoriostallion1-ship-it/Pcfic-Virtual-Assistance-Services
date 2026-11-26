@@ -72,6 +72,9 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
 .svc label{margin-top:0}
 .svc .bar{margin-top:10px}.svc .bar .sp{flex:1}
 .svc.dirty{border-color:var(--blue)}
+.svc .media{display:flex;gap:12px;align-items:center;margin-top:10px}
+.svc .media .th{width:96px;height:60px;border-radius:8px;background:#e8eefc center/cover no-repeat;border:1px solid var(--line);flex-shrink:0;display:grid;place-items:center;font-size:.7rem;color:#7a879e}
+.svc .media .grow{flex:1}
 .tabs{display:flex;gap:6px;margin-bottom:14px}
 .tab{padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:.75rem;cursor:pointer}
 .tab.on{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -109,7 +112,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
 
   <nav class="nav" id="nav">
     <button class="on" data-view="clients">Clients</button>
-    <button data-view="contact">Contact</button>
+    <button data-view="contact">Contact &amp; Home</button>
     <button data-view="services">Services</button>
   </nav>
 
@@ -173,7 +176,15 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
         <div><label for="s-email">Email</label><input id="s-email" data-key="email" type="email"></div>
         <div><label for="s-facebook_url">Facebook page link (empty = hide icon)</label><input id="s-facebook_url" data-key="facebook_url" placeholder="https://facebook.com/..."></div>
       </div>
-      <div class="foot"><span class="sp"></span><button class="btn" id="settings-save">Save contact details</button></div>
+      <div class="head" style="margin:26px 0 0"><h2>Homepage heading</h2></div>
+      <p class="hint" style="margin-top:-8px">The big text at the top of the home page.</p>
+      <div class="grid2">
+        <div><label for="s-hero_line1">Heading line 1</label><input id="s-hero_line1" data-key="hero_line1" placeholder="Stop the scroll."></div>
+        <div><label for="s-hero_line2">Heading line 2</label><input id="s-hero_line2" data-key="hero_line2" placeholder="Grow your brand."></div>
+        <div><label for="s-hero_line3">Heading line 3 (blue)</label><input id="s-hero_line3" data-key="hero_line3" placeholder="Island grown."></div>
+      </div>
+      <label for="s-hero_lead">Subheading</label><textarea id="s-hero_lead" data-key="hero_lead"></textarea>
+      <div class="foot"><span class="sp"></span><button class="btn" id="settings-save">Save</button></div>
     </section>
 
     <!-- SERVICES -->
@@ -186,6 +197,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
         <button class="tab" data-cat="creative">Web &amp; Creative</button>
       </div>
       <div id="svc-list"></div>
+      <input type="file" id="svc-img-file" accept="image/*" class="hidden">
     </section>
   </main>
 </div>
@@ -430,7 +442,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
     this.disabled = true;
     var r = await sb.from("settings").upsert(rows);
     this.disabled = false;
-    toast(r.error ? "Save failed: " + r.error.message : "Contact details saved", !!r.error);
+    toast(r.error ? "Save failed: " + r.error.message : "Saved", !!r.error);
   });
 
   // ================= SERVICES =================
@@ -454,6 +466,10 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
           '<div><label>Category</label><select data-f="category">' + opts(CATS, s.category) + "</select></div>" +
           '<div><label>Icon</label><select data-f="icon">' + opts(ICONS, s.icon) + "</select></div></div>" +
         '<label style="margin-top:10px">Description</label><textarea data-f="description">' + esc(s.description) + "</textarea>" +
+        '<div class="media"><span class="th"' + (s.image_url ? ' style="background-image:url(\'' + esc(s.image_url) + '\')">' : ">No picture") + "</span>" +
+          '<div class="grow"><label style="margin-top:0">Badge (optional, e.g. New · Free)</label><input data-f="badge" value="' + esc(s.badge || "") + '" placeholder="Leave empty for none"></div>' +
+          '<button class="btn ghost sm" data-act="img">' + (s.image_url ? "Replace picture" : "+ Picture") + "</button>" +
+          (s.image_url ? '<button class="btn ghost sm" data-act="noimg">Remove</button>' : "") + "</div>" +
         '<div class="bar"><button class="btn ghost sm" data-act="up"' + (i === 0 ? " disabled" : "") + ">↑</button>" +
           '<button class="btn ghost sm" data-act="down"' + (i === list.length - 1 ? " disabled" : "") + ">↓</button>" +
           '<span class="sp"></span><button class="btn danger sm" data-act="del">Delete</button>' +
@@ -477,6 +493,12 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       Object.assign(s, patch); card.classList.remove("dirty"); toast("Service saved");
       if (filter !== "all" && patch.category !== filter) renderServices();
     }
+    if (act === "img") { svcImgFor = s; $("#svc-img-file").click(); }
+    if (act === "noimg") {
+      var ri = await sb.from("services").update({ image_url: "" }).eq("id", id);
+      if (ri.error) return toast("Could not remove: " + ri.error.message, true);
+      s.image_url = ""; renderServices(); toast("Picture removed");
+    }
     if (act === "del") {
       if (!confirm("Delete “" + s.title + "”? This cannot be undone.")) return;
       var d = await sb.from("services").delete().eq("id", id);
@@ -493,6 +515,16 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       s.sort_order = c; other.sort_order = a;
       services.sort(function (x, y) { return x.sort_order - y.sort_order; }); renderServices();
     }
+  });
+  var svcImgFor = null;
+  $("#svc-img-file").addEventListener("change", async function () {
+    var f = this.files[0]; this.value = ""; var s = svcImgFor; if (!f || !s) return;
+    try {
+      var url = await upload(f, "services");
+      var r = await sb.from("services").update({ image_url: url }).eq("id", s.id);
+      if (r.error) throw new Error(r.error.message);
+      s.image_url = url; renderServices(); toast("Picture saved");
+    } catch (err) { toast(err.message, true); }
   });
   $("#svc-add").addEventListener("click", async function () {
     var max = services.reduce(function (m, x) { return Math.max(m, x.sort_order); }, 0);

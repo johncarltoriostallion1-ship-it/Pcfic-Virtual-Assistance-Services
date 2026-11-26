@@ -65,11 +65,18 @@
     var tag = { accounting: "Accounting", social: "Social Media", creative: "Web &amp; Creative" };
     var page = { accounting: "accounting.html", social: "social-media.html", creative: "contact.html" };
 
+    var badge = function (s) { return (s.badge || "").trim(); };
+    var freeTag = function (s) { return badge(s) ? '<span class="free-tag">' + esc(/free/i.test(badge(s)) ? "Free" : badge(s)) + "</span>" : ""; };
+
     $$("[data-svc-lib]").forEach(function (grid) {
       grid.innerHTML = list.map(function (s) {
-        return '<a class="lib-item reveal in" data-cat="' + esc(s.category) + '" href="' + page[s.category] + '">' +
-          '<span class="tag">' + tag[s.category] + "</span><h3>" + esc(s.title) + "</h3><p>" + esc(s.description) + "</p>" +
-          '<span class="more">Learn more ' + (I.arrow || "") + "</span></a>";
+        var img = safeUrl(s.image_url);
+        var media = img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="lib-ic">' + (I[s.icon] || I.book || "") + "</span>";
+        return '<a class="lib-item reveal in' + (badge(s) ? " is-free" : "") + '" data-cat="' + esc(s.category) + '" href="' + page[s.category] + '">' +
+          '<span class="lib-media m-' + esc(s.category) + (img ? "" : " no-img") + '">' + media + '<span class="tag">' + tag[s.category] + "</span>" +
+          (badge(s) ? '<span class="lib-badge">' + esc(badge(s)) + "</span>" : "") + "</span>" +
+          '<span class="lib-body"><h3>' + esc(s.title) + "</h3><p>" + esc(s.description) + "</p>" +
+          '<span class="more">Learn more ' + (I.arrow || "") + "</span></span></a>";
       }).join("");
       var active = document.querySelector('[data-filter-group="#lib"] .chip.active');
       if (active) active.click();
@@ -79,15 +86,25 @@
     $$("[data-svc-feat]").forEach(function (grid) {
       var cat = grid.getAttribute("data-svc-feat");
       grid.innerHTML = list.filter(function (s) { return s.category === cat; }).map(function (s, i) {
-        return '<div class="feat reveal in' + ["", " d1", " d2"][i % 3] + '"><div class="ic">' + (I[s.icon] || I.book || "") + "</div><h3>" +
-          esc(s.title) + "</h3><p>" + esc(s.description) + "</p></div>";
+        return '<div class="feat reveal in' + ["", " d1", " d2"][i % 3] + (badge(s) ? " is-free" : "") + '"><div class="ic">' + (I[s.icon] || I.book || "") + "</div><h3>" +
+          freeTag(s) + esc(s.title) + "</h3><p>" + esc(s.description) + "</p></div>";
       }).join("");
     });
 
     $$("[data-svc-list]").forEach(function (ul) {
       var cat = ul.getAttribute("data-svc-list");
       ul.innerHTML = list.filter(function (s) { return s.category === cat; }).map(function (s) {
-        return "<li>" + esc(s.title) + "</li>";
+        return "<li>" + freeTag(s) + esc(s.title) + "</li>";
+      }).join("");
+    });
+
+    // "New free service" band on the social media page (any service with a badge)
+    var free = list.filter(function (s) { return badge(s); });
+    $$("[data-svc-free]").forEach(function (box) {
+      var band = box.closest(".free-band");
+      if (band) band.style.display = free.length ? "" : "none";
+      box.innerHTML = free.map(function (s) {
+        return '<div class="free-item">' + freeTag(s) + "<h3>" + esc(s.title) + "</h3><p>" + esc(s.description) + "</p></div>";
       }).join("");
     });
   }
