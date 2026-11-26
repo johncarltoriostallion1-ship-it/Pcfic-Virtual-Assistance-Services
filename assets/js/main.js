@@ -1,0 +1,95 @@
+// Header state
+const header = document.querySelector('.header');
+const onScroll = () => header && header.classList.toggle('solid', window.scrollY > 40);
+onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+
+// Mobile menu
+const toggle = document.querySelector('.menu-toggle');
+if (toggle) toggle.addEventListener('click', () => {
+  document.body.classList.toggle('menu-open');
+  toggle.setAttribute('aria-expanded', document.body.classList.contains('menu-open'));
+});
+document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', () => document.body.classList.remove('menu-open')));
+
+// Reveal on scroll
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Count-up stats
+const cio = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return; cio.unobserve(e.target);
+  const el = e.target, end = +el.dataset.count, t0 = performance.now(), dur = 1600;
+  const step = t => { const p = Math.min((t - t0) / dur, 1); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}), { threshold: .5 });
+document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+// Generic filter (library + portfolio)
+document.querySelectorAll('[data-filter-group]').forEach(group => {
+  const target = document.querySelector(group.dataset.filterGroup);
+  group.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
+    group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const f = chip.dataset.filter;
+    target.querySelectorAll('[data-cat]').forEach(it => it.classList.toggle('hide', f !== 'all' && it.dataset.cat !== f));
+  }));
+});
+
+// Portfolio: placeholder when an image is not yet exported
+document.querySelectorAll('.work img').forEach(img => {
+  const mark = () => img.closest('.work').classList.add('missing');
+  if (img.complete && img.naturalWidth === 0) mark(); else img.addEventListener('error', mark);
+});
+
+// Lightbox
+const lb = document.querySelector('.lightbox');
+if (lb) {
+  const lbImg = lb.querySelector('img'); let list = [], idx = 0;
+  const show = i => { idx = (i + list.length) % list.length; lbImg.src = list[idx].src; lbImg.alt = list[idx].alt; };
+  document.querySelectorAll('.work').forEach(w => w.addEventListener('click', () => {
+    if (w.classList.contains('missing')) return;
+    list = [...document.querySelectorAll('.work:not(.hide):not(.missing) img')];
+    show(list.indexOf(w.querySelector('img'))); lb.classList.add('open');
+  }));
+  lb.querySelector('.lb-close').onclick = () => lb.classList.remove('open');
+  lb.querySelector('.lb-prev').onclick = e => { e.stopPropagation(); show(idx - 1); };
+  lb.querySelector('.lb-next').onclick = e => { e.stopPropagation(); show(idx + 1); };
+  lb.addEventListener('click', e => { if (e.target === lb) lb.classList.remove('open'); });
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') lb.classList.remove('open');
+    if (e.key === 'ArrowLeft') show(idx - 1);
+    if (e.key === 'ArrowRight') show(idx + 1);
+  });
+}
+
+// WhatsApp check-in form -> opens WhatsApp with a pre-filled message
+const form = document.querySelector('#checkin-form');
+if (form) form.addEventListener('submit', e => {
+  e.preventDefault();
+  const d = new FormData(form);
+  const services = d.getAll('service').join(', ') || 'Not sure yet';
+  const msg = `Hi! I'd like to check in.\n\nName: ${d.get('name')}\nBusiness: ${d.get('business') || '-'}\nEmail: ${d.get('email') || '-'}\nInterested in: ${services}\n\n${d.get('message') || ''}`;
+  window.open(`https://wa.me/${form.dataset.wa}?text=${encodeURIComponent(msg)}`, '_blank');
+});
+
+document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
+
+// 3D tilt on logo medallions
+if (matchMedia('(hover:hover)').matches) document.querySelectorAll('.medal').forEach(m => {
+  const t = m.querySelector('.tile');
+  m.addEventListener('mousemove', e => {
+    const r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    t.style.transform = `rotateY(${x * 22}deg) rotateX(${-y * 22}deg) translateY(-4px)`;
+  });
+  m.addEventListener('mouseleave', () => { t.style.transform = ''; });
+});
+
+// Deep-link a brand filter on the portfolio: social-media.html#brand-hsp
+const applyHash = () => {
+  const h = location.hash.replace('#', '');
+  if (!h.startsWith('brand-')) return;
+  const chip = document.querySelector(`.chip[data-filter="${h.slice(6)}"]`);
+  if (chip) { chip.click(); document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' }); }
+};
+applyHash(); window.addEventListener('hashchange', applyHash);
