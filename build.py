@@ -13,7 +13,8 @@ TAGLINE = "Virtual Assistance Services"
 WA_NUMBER = "16717888712"                   # WhatsApp number, digits only (country code first)
 WA_DISPLAY = "+1 (671) 788-8712"
 EMAIL = "pcficvaservices@gmail.com"
-LOCATION = "Guam"
+LOCATION = "Tamuning, Guam"
+FB_URL = "https://www.facebook.com/PacificVirtualAssistanceServ"
 OWNER_1 = ("Jimmy Barriga", "Co-Founder · Accounting Lead")
 OWNER_2 = ("Janna Sulit", "Co-Founder · Creative & Social Lead")
 
@@ -101,8 +102,8 @@ def footer():
     <div class="footer-grid">
       <div>
         <a href="index.html" class="brand"><span class="brand-logo"><img src="assets/img/logo-pcfic-sm.png" alt="{BRAND} logo"></span><span class="brand-text"><strong>{BRAND}</strong><small style="color:rgba(255,255,255,.55)">{TAGLINE}</small></span></a>
-        <p>Accounting and social media support for businesses across Guam and the Pacific — so owners can focus on running the business.</p>
-        <div class="socials"><a href="#" aria-label="Facebook" data-cms-fb>{I["fb"]}</a><a href="{WA}" {BLANK} aria-label="WhatsApp">{I["wa"]}</a></div>
+        <p>Accounting, social media and digital marketing support for businesses across Guam and the Pacific — so owners can focus on running the business.</p>
+        <div class="socials"><a href="{FB_URL}" {BLANK} aria-label="Facebook" data-cms-fb>{I["fb"]}</a><a href="{WA}" {BLANK} aria-label="WhatsApp">{I["wa"]}</a></div>
       </div>
       <div><h4>Services</h4><ul><li><a href="accounting.html">Accounting Services</a></li><li><a href="social-media.html">Social Media Services</a></li><li><a href="services.html">Service Library</a></li><li><a href="social-media.html#portfolio">Our Work</a></li></ul></div>
       <div><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="clients.html">Our Clients</a></li><li><a href="contact.html">Contact</a></li></ul></div>
@@ -275,6 +276,27 @@ home = f'''<section class="hero">
       <a class="btn btn-outline" href="social-media.html#portfolio">View full portfolio {I["arrow"]}</a>
     </div>
     <div class="feat-work" data-cms-featured>{''.join(work_tile(brand_of(n), n) for n in FEATURED)}</div>
+  </div>
+</section>
+<section class="fb-band">
+  <div class="container fb-grid">
+    <div class="fb-text reveal">
+      <span class="eyebrow">Follow us</span>
+      <h2>Fresh from our <span class="text-blue">Facebook page.</span></h2>
+      <p class="lead">Helping brands grow with smart ads, strong visuals and real results. See our latest posts, tips and client work as soon as we publish them.</p>
+      <ul class="fb-points">
+        <li>{I["social"]} Social media management</li>
+        <li>{I["target"]} Facebook ads management</li>
+        <li>{I["web"]} Website development</li>
+        <li>{I["pen"]} Professional logo design</li>
+        <li>{I["video"]} Video editing</li>
+      </ul>
+      <a class="btn btn-primary" href="{FB_URL}" {BLANK} data-cms-fb-link>{I["fb"]} Follow us on Facebook</a>
+    </div>
+    <div class="fb-frame reveal d2">
+      <iframe title="PCFIC on Facebook" loading="lazy" allow="encrypted-media" data-fb-embed
+        src="https://www.facebook.com/plugins/page.php?href={FB_URL.replace(':', '%3A').replace('/', '%2F')}&amp;tabs=timeline&amp;width=500&amp;height=640&amp;small_header=true&amp;adapt_container_width=true&amp;hide_cover=false&amp;show_facepile=false"></iframe>
+    </div>
   </div>
 </section>
 <section class="bg-sky">

@@ -42,9 +42,14 @@
 
     if (S.email) $$("[data-cms-mail]").forEach(function (a) { a.href = "mailto:" + S.email; });
 
-    $$("[data-cms-fb]").forEach(function (a) {
-      if (safeUrl(S.facebook_url)) { a.href = S.facebook_url; a.target = "_blank"; a.rel = "noopener"; }
-      else a.style.display = "none";
+    var fb = safeUrl(S.facebook_url);
+    $$("[data-cms-fb], [data-cms-fb-link]").forEach(function (a) {
+      if (fb) { a.href = fb; a.target = "_blank"; a.rel = "noopener"; }
+      else if (a.getAttribute("href") === "#") a.style.display = "none";
+    });
+    if (fb) $$("iframe[data-fb-embed]").forEach(function (f) {
+      var next = f.src.replace(/href=[^&]*/, "href=" + encodeURIComponent(fb));
+      if (next !== f.src) f.src = next;
     });
   }
 
