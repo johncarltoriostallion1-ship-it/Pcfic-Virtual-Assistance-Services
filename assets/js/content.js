@@ -18,6 +18,11 @@
   var $$ = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
   var safeUrl = function (u) { u = String(u || ""); return /^(https?:\/\/|assets\/)/i.test(u) ? u : ""; };
   var BLANK = ' target="_blank" rel="noopener"';
+  var WA = "16717888712"; // updated from settings
+  // Partner buttons go to OUR WhatsApp (not the partner's website)
+  var waAsk = function (c) {
+    return "https://wa.me/" + WA + "?text=" + encodeURIComponent("Hi PCFIC! I'd like to learn more about website design & development (with " + (c.short_name || c.name) + ").");
+  };
 
   // ---------------- settings ----------------
   function applySettings(rows) {
@@ -33,6 +38,7 @@
 
     var num = (S.whatsapp_number || "").replace(/\D/g, "");
     if (num) {
+      WA = num;
       $$('a[href^="https://wa.me/"]').forEach(function (a) {
         a.href = a.href.replace(/wa\.me\/\d*/, "wa.me/" + num);
       });
@@ -184,7 +190,7 @@
     var ring = shown.indexOf(c) >= 0 ? shown : all;
     var i = ring.indexOf(c), prev = ring[(i - 1 + ring.length) % ring.length], next = ring[(i + 1) % ring.length];
     var meta = [c.industry, c.location].filter(Boolean).join(" · ");
-    var site = safeUrl(c.website);
+    var site = c.is_partner ? "" : safeUrl(c.website);
     var siteLink = site ? '<a class="ch-site" href="' + esc(site) + '"' + BLANK + ">" + esc(site.replace(/^https?:\/\//, "")) + " " + (I.out || "") + "</a>" : "";
     var sub = c.about ? esc(c.about) : "Content and design we've created for " + esc(short(c)) + ".";
     if (siteLink) sub += '<br><span class="ph-site">' + siteLink + "</span>";
@@ -203,7 +209,7 @@
       '<section class="ch-work" id="work"><div class="container"><div class="ch-head"><h2>Work for ' + esc(short(c)) + '</h2><div class="svc-tags small">' + tags + "</div></div>" + gallery +
         (c.is_partner ? '<div class="partner-banner reveal in"><span class="pb-logo">' + logoImg(c, "") + "</span><div><small>★ " + esc(c.partner_label || "Official Partner") +
           "</small><h3>Partnered with " + esc(c.name) + "</h3><p>We're proud to work hand in hand with " + esc(short(c)) + " to help businesses grow.</p></div>" +
-          (site ? '<a class="btn btn-white" href="' + esc(site) + '"' + BLANK + ">Visit " + esc(short(c)) + " " + (I.out || "") + "</a>" : "") + "</div>" : "") +
+          '<a class="btn btn-white" href="' + esc(waAsk(c)) + '"' + BLANK + ">Learn more " + (I.arrow || "") + "</a></div>" : "") +
         "</div></section>" +
       (ring.length > 1 ? '<section class="section-sm" style="padding-top:0"><div class="container client-nav">' +
         '<a href="' + link(prev) + '">' + logoImg(prev, "") + "<div><small>← Previous client</small><b>" + esc(short(prev)) + "</b></div></a>" +
