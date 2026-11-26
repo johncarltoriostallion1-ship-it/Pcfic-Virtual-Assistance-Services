@@ -38,9 +38,9 @@ document.addEventListener('click', e => {
 });
 
 // Long grids: show the first few, then a "See more" button
-const LIMITS = { lib: [6, 'See more services'], vids: [8, 'See more videos'] };
+const LIMITS = { lib: [6, 'See more services'], vids: [8, 'See more videos'], work: [12, 'See more designs'] };
 window.limitGrid = id => {
-  const grid = document.getElementById(id); if (!grid) return;
+  const grid = document.getElementById(id); if (!grid || (id === 'work' && !grid.hasAttribute('data-cms-work'))) return;
   const [n, label] = LIMITS[id];
   let btn = grid.nextElementSibling;
   if (!btn || !btn.classList.contains('lib-more')) {

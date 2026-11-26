@@ -196,6 +196,8 @@
     if (main) renderClientPage(main, all, shown);
 
     if (window.markMissingWork) window.markMissingWork();
+    var wg = document.getElementById("work"); if (wg) wg.classList.remove("expanded");
+    if (window.limitGrid) window.limitGrid("work");
     if (window.applyBrandHash) window.applyBrandHash();
   }
 
