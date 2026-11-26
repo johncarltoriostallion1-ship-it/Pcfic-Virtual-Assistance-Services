@@ -798,3 +798,13 @@ p{color:var(--muted)}
   .svc-grid.three .svc-card{padding:32px 24px}
   .partner-banner{padding:28px 22px;gap:18px}
 }
+
+/* ===== Mobile menu: always full screen (also after scrolling) ===== */
+@media (max-width:900px){
+  .menu-open .header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:#fff!important;box-shadow:none}
+  .nav{height:100vh;height:100dvh;justify-content:flex-start;padding:110px 8% 40px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .menu-open .nav{visibility:visible}
+  .nav a{flex-shrink:0}
+  html.menu-lock,body.menu-open{overflow:hidden}
+  .menu-open .wa-float{display:none}
+}
