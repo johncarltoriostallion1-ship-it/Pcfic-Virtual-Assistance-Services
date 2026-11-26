@@ -1,20 +1,21 @@
 """Builds the static multi-page site. Edit the CONFIG block, then run:  python build.py"""
-import os, html
+import os, html, time
 from icons import I
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 e = html.escape
+V = str(int(time.time()))  # cache-buster: browsers load fresh CSS/JS after every build
 
 # ============================== CONFIG ==============================
 BRAND = "PCFIC"                            # short wordmark
 BRAND_FULL = "PCFIC Virtual Assistance Services"
 TAGLINE = "Virtual Assistance Services"
-WA_NUMBER = "16710000000"                   # WhatsApp number, digits only (country code first)
-WA_DISPLAY = "+1 (671) 000-0000"
-EMAIL = "hello@yourdomain.com"
+WA_NUMBER = "16717888712"                   # WhatsApp number, digits only (country code first)
+WA_DISPLAY = "+1 (671) 788-8712"
+EMAIL = "pcficvaservices@gmail.com"
 LOCATION = "Guam"
-OWNER_1 = ("Owner Name", "Co-Founder · Accounting Lead")
-OWNER_2 = ("Owner Name", "Co-Founder · Creative & Social Lead")
+OWNER_1 = ("Jimmy Barriga", "Co-Founder · Accounting Lead")
+OWNER_2 = ("Janna Sulit", "Co-Founder · Creative & Social Lead")
 
 # Clients with logos -> each gets its own page: client-<slug>.html
 CLIENTS = [
@@ -101,11 +102,11 @@ def footer():
       <div>
         <a href="index.html" class="brand"><span class="brand-logo"><img src="assets/img/logo-pcfic-sm.png" alt="{BRAND} logo"></span><span class="brand-text"><strong>{BRAND}</strong><small style="color:rgba(255,255,255,.55)">{TAGLINE}</small></span></a>
         <p>Accounting and social media support for businesses across Guam and the Pacific — so owners can focus on running the business.</p>
-        <div class="socials"><a href="#" aria-label="Facebook">{I["fb"]}</a><a href="#" aria-label="Instagram">{I["ig"]}</a><a href="#" aria-label="LinkedIn">{I["in"]}</a><a href="{WA}" {BLANK} aria-label="WhatsApp">{I["wa"]}</a></div>
+        <div class="socials"><a href="#" aria-label="Facebook" data-cms-fb>{I["fb"]}</a><a href="{WA}" {BLANK} aria-label="WhatsApp">{I["wa"]}</a></div>
       </div>
       <div><h4>Services</h4><ul><li><a href="accounting.html">Accounting Services</a></li><li><a href="social-media.html">Social Media Services</a></li><li><a href="services.html">Service Library</a></li><li><a href="social-media.html#portfolio">Our Work</a></li></ul></div>
       <div><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="clients.html">Our Clients</a></li><li><a href="contact.html">Contact</a></li></ul></div>
-      <div><h4>Get in touch</h4><ul><li><a href="{WA}" {BLANK}>WhatsApp: {WA_DISPLAY}</a></li><li><a href="mailto:{EMAIL}">{EMAIL}</a></li><li>{LOCATION}</li></ul></div>
+      <div><h4>Get in touch</h4><ul><li><a href="{WA}" {BLANK}>WhatsApp: <span data-cms="whatsapp_display">{WA_DISPLAY}</span></a></li><li><a href="mailto:{EMAIL}" data-cms-mail><span data-cms="email">{EMAIL}</span></a></li><li>{LOCATION}</li></ul></div>
     </div>
     <div class="footer-bottom"><span>© <span data-year></span> {BRAND_FULL}. All rights reserved.</span><span>Serving Guam & the Pacific</span></div>
   </div>
@@ -114,7 +115,7 @@ def footer():
 
 LIGHTBOX = f'<div class="lightbox" aria-hidden="true"><button class="lb-close" aria-label="Close">{I["close"]}</button><button class="lb-prev" aria-label="Previous">{I["left"]}</button><img alt=""><button class="lb-next" aria-label="Next">{I["right"]}</button></div>'
 
-def page(fname, title, desc, body):
+def page(fname, title, desc, body, main_attr=""):
     doc = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,15 +127,18 @@ def page(fname, title, desc, body):
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,800&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v={V}">
 </head>
 <body>
 {header(fname)}
-<main>
+<main{main_attr}>
 {body}
 </main>
 {footer()}
-<script src="assets/js/main.js"></script>
+<script src="assets/js/main.js?v={V}"></script>
+<script src="assets/js/icons.js?v={V}"></script>
+<script src="assets/js/cms-config.js?v={V}"></script>
+<script src="assets/js/content.js?v={V}"></script>
 </body>
 </html>'''
     with open(os.path.join(HERE, fname), "w", encoding="utf-8") as f:
@@ -174,7 +178,7 @@ PROOF = f'''<section class="proof">
     <span class="eyebrow reveal">Our clients</span>
     <h2 class="reveal d1">Trusted by businesses <b>across Guam.</b></h2>
     <p class="lead reveal d2">Clinics, schools, studios and service brands — tap any logo to see the work we've created for them.</p>
-    <div class="medals">{''.join(medal(c) for c in CLIENTS)}</div>
+    <div class="medals" data-cms-medals>{''.join(medal(c) for c in CLIENTS)}</div>
     <p class="proof-note reveal">Real clients · Real work · Locally made</p>
   </div>
 </section>'''
@@ -184,30 +188,34 @@ SVC_CARDS = f'''<div class="svc-grid">
     <span class="num">01</span><div class="ic">{I["calc"]}</div>
     <h3>Accounting Services</h3>
     <p>Clean books, on-time payroll and reports you can actually read — so every decision is backed by real numbers.</p>
-    <ul><li>Bookkeeping</li><li>Payroll</li><li>Financial statements</li><li>Tax-ready records</li><li>Accounts payable & receivable</li><li>Software setup</li></ul>
+    <ul data-svc-list="accounting"><li>Bookkeeping</li><li>Payroll</li><li>Financial statements</li><li>Tax-ready records</li><li>Accounts payable & receivable</li><li>Software setup</li></ul>
     <span class="btn btn-primary">Explore accounting {I["arrow"]}</span>
   </a>
   <a href="social-media.html" class="svc-card dark reveal d2">
     <span class="num">02</span><div class="ic">{I["social"]}</div>
     <h3>Social Media Services</h3>
     <p>Scroll-stopping content, consistent posting and ads that bring real customers through your door.</p>
-    <ul><li>Content calendar</li><li>Graphic design</li><li>Copywriting</li><li>Page management</li><li>Paid ads</li><li>Monthly reports</li></ul>
+    <ul data-svc-list="social"><li>Content calendar</li><li>Graphic design</li><li>Copywriting</li><li>Page management</li><li>Paid ads</li><li>Monthly reports</li></ul>
     <span class="btn btn-white">Explore social media {I["arrow"]}</span>
   </a>
 </div>'''
 
 def owners_block(full=False):
     btn = '' if full else f'<a class="btn btn-primary" href="about.html">Our story {I["arrow"]}</a>'
-    return f'''<div class="founders">
-  <div class="f-head reveal">
-    <div><span class="eyebrow">Meet the founders</span><h2>Two specialists. <span class="text-blue">One team</span> behind your business.</h2></div>
-    <div><p class="lead">One of us keeps your numbers accurate. The other makes sure the right people see your brand. Together we cover the two things most owners never have time for.</p>{btn}</div>
+    return f'''<div class="founders2">
+  <div class="f2-text reveal">
+    <span class="eyebrow">Meet the founders</span>
+    <h2>Two specialists. <span class="text-blue">One team</span> behind your business.</h2>
+    <p class="lead">One of us keeps your numbers accurate. The other makes sure the right people see your brand. Together we cover the two things most owners never have time for.</p>
+    <div class="f2-people">
+      <div class="f2-p"><img class="f2-av" src="assets/img/founder-jimmy.jpg" alt="{OWNER_1[0]}"><span class="f2-ic">{I["calc"]}</span><div><b>{OWNER_1[0]}</b><small>{OWNER_1[1]}</small></div></div>
+      <div class="f2-p"><img class="f2-av" src="assets/img/founder-janna.jpg" alt="{OWNER_2[0]}"><span class="f2-ic">{I["social"]}</span><div><b>{OWNER_2[0]}</b><small>{OWNER_2[1]}</small></div></div>
+    </div>
+    {btn}
   </div>
-  <figure class="f-photo reveal d1">
+  <figure class="f2-photo reveal d2">
     <img src="assets/img/owners.jpg" alt="The founders of {BRAND_FULL}">
     <span class="f-chip">{I["heart"]} Locally owned · Guam</span>
-    <figcaption class="f-tag t1"><b>{OWNER_1[0]}</b><small>{OWNER_1[1]}</small></figcaption>
-    <figcaption class="f-tag t2"><b>{OWNER_2[0]}</b><small>{OWNER_2[1]}</small></figcaption>
   </figure>
 </div>'''
 
@@ -215,7 +223,7 @@ def logo_marquee():
     items = "".join(f'''<a class="mq-item" href="client-{c["slug"]}.html"><span class="mq-tile"><img src="assets/img/clients/{c["logo"]}" alt="{e(c["name"])} logo" loading="lazy"></span><span class="mq-name">{e(c["short"])}</span></a>''' for c in CLIENTS)
     return f'''<section class="logo-band" id="work-band" aria-label="Our clients">
   <div class="container center"><p class="mq-caption">Trusted by clinics, schools and growing brands across Guam</p></div>
-  <div class="mq"><div class="mq-track">{items}<span class="mq-dup" aria-hidden="true">{items}</span></div></div>
+  <div class="mq"><div class="mq-track" data-cms-marquee>{items}<span class="mq-dup" aria-hidden="true">{items}</span></div></div>
 </section>'''
 
 def brand_of(n):
@@ -234,8 +242,8 @@ home = f'''<section class="hero">
           <text><textPath href="#sealpath" textLength="480">{BRAND} · VIRTUAL ASSISTANCE SERVICES · GUAM ·</textPath></text></svg>
         <span class="seal-mark"><img src="assets/img/logo-pcfic.png" alt=""></span>
       </div>
-      <h1 class="reveal d1"><span>Clean books.</span><span>Bold brands.</span><span class="accent">Island grown.</span></h1>
-      <p class="lead reveal d2">Guam's locally owned accounting and social media team. <br>Bookkeeping, payroll and content that brings customers in.</p>
+      <h1 class="reveal d1"><span data-cms="hero_line1">Clean books.</span><span data-cms="hero_line2">Bold brands.</span><span class="accent" data-cms="hero_line3">Island grown.</span></h1>
+      <p class="lead reveal d2" data-cms="hero_lead">Guam's locally owned accounting and social media team. <br>Bookkeeping, payroll and content that brings customers in.</p>
       <div class="hero-ctas reveal d3">
         <a class="btn btn-primary btn-wa" href="{WA}" {BLANK}>{I["wa"]} WhatsApp check-in</a>
         <a class="text-link" href="clients.html">See our clients {I["arrow"]}</a>
@@ -254,9 +262,9 @@ home = f'''<section class="hero">
 <div id="clients">{PROOF}</div>
 <section class="stats section-sm">
   <div class="container stats-grid">
-    <div class="stat reveal"><b><span data-count="{len(CLIENTS)}">0</span><em>+</em></b><span class="lbl">Business clients</span></div>
-    <div class="stat reveal d1"><b><span data-count="{len(WORK)}">0</span><em>+</em></b><span class="lbl">Social designs delivered</span></div>
-    <div class="stat reveal d2"><b><span data-count="{len(BRANDS)}">0</span></b><span class="lbl">Brands in our portfolio</span></div>
+    <div class="stat reveal"><b><span data-count="{len(CLIENTS)}" data-cms-stat="clients">0</span><em>+</em></b><span class="lbl">Business clients</span></div>
+    <div class="stat reveal d1"><b><span data-count="{len(WORK)}" data-cms-stat="designs">0</span><em>+</em></b><span class="lbl">Social designs delivered</span></div>
+    <div class="stat reveal d2"><b><span data-count="{len(BRANDS)}" data-cms-stat="brands">0</span></b><span class="lbl">Brands in our portfolio</span></div>
     <div class="stat reveal d3"><b><span data-count="2">0</span></b><span class="lbl">Core services, one team</span></div>
   </div>
 </section>
@@ -266,7 +274,7 @@ home = f'''<section class="hero">
       <div><span class="eyebrow">Featured work</span><h2>Content made for real brands</h2></div>
       <a class="btn btn-outline" href="social-media.html#portfolio">View full portfolio {I["arrow"]}</a>
     </div>
-    <div class="feat-work">{''.join(work_tile(brand_of(n), n) for n in FEATURED)}</div>
+    <div class="feat-work" data-cms-featured>{''.join(work_tile(brand_of(n), n) for n in FEATURED)}</div>
   </div>
 </section>
 <section class="bg-sky">
@@ -310,7 +318,7 @@ services = f'''{page_hero('<span>Services</span>', 'Service library', 'Everythin
   <div class="container">
     <div class="section-head center reveal"><span class="eyebrow">The library</span><h2>Browse by service</h2></div>
     <div class="lib-filter" data-filter-group="#lib"><button class="chip active" data-filter="all">All services</button><button class="chip" data-filter="accounting">Accounting</button><button class="chip" data-filter="social">Social Media</button></div>
-    <div class="lib-grid" id="lib">{lib_items}</div>
+    <div class="lib-grid" id="lib" data-svc-lib>{lib_items}</div>
   </div>
 </section>
 <section>
@@ -330,7 +338,7 @@ acct = f'''{page_hero('<a href="services.html">Services</a><span>/</span><span>A
 <section>
   <div class="container">
     <div class="section-head center reveal"><span class="eyebrow">What's included</span><h2>Everything your books need</h2></div>
-    <div class="feat-grid">
+    <div class="feat-grid" data-svc-feat="accounting">
       <div class="feat reveal"><div class="ic">{I["book"]}</div><h3>Monthly Bookkeeping</h3><p>Transactions recorded, categorized and reconciled with your bank and card statements.</p></div>
       <div class="feat reveal d1"><div class="ic">{I["users"]}</div><h3>Payroll Processing</h3><p>Employees paid correctly and on time, with pay stubs and payroll records kept in order.</p></div>
       <div class="feat reveal d2"><div class="ic">{I["chart"]}</div><h3>Financial Statements</h3><p>Monthly P&L, balance sheet and cash flow — with a short summary of what they mean.</p></div>
@@ -382,7 +390,7 @@ social = f'''{page_hero('<a href="services.html">Services</a><span>/</span><span
 <section>
   <div class="container">
     <div class="section-head center reveal"><span class="eyebrow">What's included</span><h2>Your full social media team</h2></div>
-    <div class="feat-grid">
+    <div class="feat-grid" data-svc-feat="social">
       <div class="feat reveal"><div class="ic">{I["cal"]}</div><h3>Content Calendar</h3><p>A month of posts planned around your promos, events and seasons.</p></div>
       <div class="feat reveal d1"><div class="ic">{I["pen"]}</div><h3>Graphic Design</h3><p>On-brand posts, carousels and flyers — see real examples below.</p></div>
       <div class="feat reveal d2"><div class="ic">{I["file"]}</div><h3>Copywriting</h3><p>Captions and calls-to-action written to get comments, clicks and calls.</p></div>
@@ -395,8 +403,8 @@ social = f'''{page_hero('<a href="services.html">Services</a><span>/</span><span
 <section class="bg-sky" id="portfolio">
   <div class="container">
     <div class="section-head center reveal"><span class="eyebrow">Our work</span><h2>Designs we've made for real clients</h2><p class="lead">Filter by brand. Tap any design to view it larger.</p></div>
-    <div class="lib-filter" data-filter-group="#work">{chips}</div>
-    <div class="work-grid" id="work">{''.join(work_tile(s, n) for s, name, n in WORK)}</div>
+    <div class="lib-filter" data-filter-group="#work" data-cms-work-chips>{chips}</div>
+    <div class="work-grid" id="work" data-cms-work>{''.join(work_tile(s, n) for s, name, n in WORK)}</div>
   </div>
 </section>
 <section>
@@ -425,7 +433,7 @@ clients = f'''{page_hero('<span>Clients</span>', 'Our clients', "Businesses we'r
   <div class="container center">
     <span class="eyebrow reveal">More from our portfolio</span>
     <h2 class="reveal">Other brands we've designed for</h2>
-    <div class="brand-chips reveal">{others}</div>
+    <div class="brand-chips reveal" data-cms-others>{others}</div>
   </div>
 </section>'''
 page("clients.html", f"Our Clients | {BRAND_FULL}", "Businesses across Guam that trust us with their accounting and social media.", clients)
@@ -463,7 +471,11 @@ for i, c in enumerate(CLIENTS):
   </div>
 </section>
 {LIGHTBOX}'''
-    page(f"client-{c['slug']}.html", f"{c['name']} | Client Work | {BRAND_FULL}", f"See the content and design work we created for {c['name']}.", body)
+    page(f"client-{c['slug']}.html", f"{c['name']} | Client Work | {BRAND_FULL}", f"See the content and design work we created for {c['name']}.", body, main_attr=f' data-client="{c["slug"]}"')
+
+# Generic client page for clients added in the admin panel: client.html?c=<slug>
+page("client.html", f"Client Work | {BRAND_FULL}", "Content and design work we created for our clients.",
+     f'<section class="section"><div class="container center"><p class="lead">Loading…</p></div></section>{LIGHTBOX}', main_attr=' data-client=""')
 
 # ------------------------------- ABOUT -------------------------------
 about = f'''{page_hero('<span>About</span>', 'About us', 'A local team that treats your business <em>like our own.</em>', 'We started with one idea: owners should spend their time growing their business, not buried in spreadsheets and posting schedules.', ctas=False)}
@@ -489,8 +501,8 @@ contact = f'''{page_hero('<span>Contact</span>', 'WhatsApp check-in', "Let's tal
       <p>Tap below to start a WhatsApp conversation with our team.</p>
       <a class="btn btn-white btn-wa" href="{WA}" {BLANK}>{I["wa"]} Open WhatsApp</a>
       <div class="info">
-        <div><span class="ic">{I["wa"]}</span><div><small>WhatsApp</small><b>{WA_DISPLAY}</b></div></div>
-        <div><span class="ic">{I["mail"]}</span><div><small>Email</small><b>{EMAIL}</b></div></div>
+        <div><span class="ic">{I["wa"]}</span><div><small>WhatsApp</small><b data-cms="whatsapp_display">{WA_DISPLAY}</b></div></div>
+        <div><span class="ic">{I["mail"]}</span><div><small>Email</small><b data-cms="email">{EMAIL}</b></div></div>
         <div><span class="ic">{I["pin"]}</span><div><small>Location</small><b>{LOCATION}</b></div></div>
         <div><span class="ic">{I["clock"]}</span><div><small>Hours</small><b>Mon–Fri · 8:00 AM – 5:00 PM ChST</b></div></div>
       </div>

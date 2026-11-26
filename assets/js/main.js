@@ -24,33 +24,36 @@ const cio = new IntersectionObserver(es => es.forEach(e => {
 }), { threshold: .5 });
 document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
 
-// Generic filter (library + portfolio)
-document.querySelectorAll('[data-filter-group]').forEach(group => {
+// Generic filter (library + portfolio). Uses event delegation so chips added later also work.
+document.addEventListener('click', e => {
+  const chip = e.target.closest('[data-filter-group] .chip');
+  if (!chip) return;
+  const group = chip.closest('[data-filter-group]');
   const target = document.querySelector(group.dataset.filterGroup);
-  group.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
-    group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    const f = chip.dataset.filter;
-    target.querySelectorAll('[data-cat]').forEach(it => it.classList.toggle('hide', f !== 'all' && it.dataset.cat !== f));
-  }));
+  group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  const f = chip.dataset.filter;
+  if (target) target.querySelectorAll('[data-cat]').forEach(it => it.classList.toggle('hide', f !== 'all' && it.dataset.cat !== f));
 });
 
-// Portfolio: placeholder when an image is not yet exported
-document.querySelectorAll('.work img').forEach(img => {
+// Portfolio: placeholder when an image is missing (also for images added later)
+window.markMissingWork = (root = document) => root.querySelectorAll('.work img').forEach(img => {
   const mark = () => img.closest('.work').classList.add('missing');
   if (img.complete && img.naturalWidth === 0) mark(); else img.addEventListener('error', mark);
 });
+markMissingWork();
 
-// Lightbox
+// Lightbox (delegated, works for tiles added later)
 const lb = document.querySelector('.lightbox');
 if (lb) {
   const lbImg = lb.querySelector('img'); let list = [], idx = 0;
   const show = i => { idx = (i + list.length) % list.length; lbImg.src = list[idx].src; lbImg.alt = list[idx].alt; };
-  document.querySelectorAll('.work').forEach(w => w.addEventListener('click', () => {
-    if (w.classList.contains('missing')) return;
+  document.addEventListener('click', e => {
+    const w = e.target.closest('.work');
+    if (!w || w.classList.contains('missing')) return;
     list = [...document.querySelectorAll('.work:not(.hide):not(.missing) img')];
     show(list.indexOf(w.querySelector('img'))); lb.classList.add('open');
-  }));
+  });
   lb.querySelector('.lb-close').onclick = () => lb.classList.remove('open');
   lb.querySelector('.lb-prev').onclick = e => { e.stopPropagation(); show(idx - 1); };
   lb.querySelector('.lb-next').onclick = e => { e.stopPropagation(); show(idx + 1); };
@@ -75,21 +78,31 @@ if (form) form.addEventListener('submit', e => {
 
 document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
 
-// 3D tilt on logo medallions
-if (matchMedia('(hover:hover)').matches) document.querySelectorAll('.medal').forEach(m => {
-  const t = m.querySelector('.tile');
-  m.addEventListener('mousemove', e => {
+// 3D tilt on logo medallions (delegated)
+if (matchMedia('(hover:hover)').matches) {
+  document.addEventListener('mousemove', e => {
+    const m = e.target.closest && e.target.closest('.medal'); if (!m) return;
+    const t = m.querySelector('.tile'); if (!t) return;
     const r = t.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
     t.style.transform = `rotateY(${x * 22}deg) rotateX(${-y * 22}deg) translateY(-4px)`;
   });
-  m.addEventListener('mouseleave', () => { t.style.transform = ''; });
-});
+  document.addEventListener('mouseout', e => {
+    const m = e.target.closest && e.target.closest('.medal');
+    if (m && !m.contains(e.relatedTarget)) { const t = m.querySelector('.tile'); if (t) t.style.transform = ''; }
+  });
+}
 
 // Deep-link a brand filter on the portfolio: social-media.html#brand-hsp
-const applyHash = () => {
+window.applyBrandHash = () => {
   const h = location.hash.replace('#', '');
   if (!h.startsWith('brand-')) return;
   const chip = document.querySelector(`.chip[data-filter="${h.slice(6)}"]`);
   if (chip) { chip.click(); document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' }); }
 };
-applyHash(); window.addEventListener('hashchange', applyHash);
+applyBrandHash(); window.addEventListener('hashchange', applyBrandHash);
+
+/* Founder avatars: show the icon until the photo file exists */
+document.querySelectorAll('.f2-av').forEach(function(img){
+  function miss(){ img.setAttribute('data-missing',''); }
+  if (img.complete && img.naturalWidth === 0) miss(); else img.addEventListener('error', miss);
+});
