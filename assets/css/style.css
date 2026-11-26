@@ -761,3 +761,40 @@ p{color:var(--muted)}
 .svc-grid.three .svc-card .num{right:28px}
 @media (max-width:1080px){.svc-grid.three{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.svc-grid.three{grid-template-columns:1fr}}
+
+/* ===== Mobile polish ===== */
+.contact-grid>*,.fb-grid>*,.founders2>*,.split>*{min-width:0}
+.wa-card .info b{overflow-wrap:anywhere}
+@media (max-width:700px){
+  section{padding:64px 0}
+  .section-sm{padding:56px 0}
+  .section-head{margin-bottom:34px}
+  .ph{padding:118px 0 84px}
+  /* contact */
+  .wa-card .info div{align-items:flex-start}
+  .wa-card .info div>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+  .wa-card .info b{font-size:.92rem}
+  .form-card input,.form-card textarea{max-width:100%}
+  /* floating WhatsApp: smaller so it covers less text */
+  .wa-float{right:14px;bottom:14px}
+  .wa-float .btn-round{width:52px;height:52px}
+  .wa-float svg{width:26px;height:26px}
+  /* founders photo frame */
+  .f2-photo::before{inset:-10px 10px 10px -10px}
+  .f2-photo{margin:0 6px}
+  .f2-people{margin:22px 0 26px}
+  .f2-p{padding:14px 16px;gap:14px}
+  /* facebook band */
+  .fb-band{padding:64px 0}
+  .fb-points{margin:22px 0 26px}
+  /* footer: brand full width, link lists side by side */
+  .footer{padding:64px 0 24px}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:34px 20px;padding-bottom:36px}
+  .footer-grid>div:first-child,.footer-grid>div:last-child{grid-column:1 / -1}
+  .footer-bottom{flex-direction:column;gap:6px;text-align:center;padding-top:20px}
+  .footer-partner{padding:18px 0}
+  /* service library cards a bit tighter */
+  .lib-item{padding:26px 24px}
+  .svc-grid.three .svc-card{padding:32px 24px}
+  .partner-banner{padding:28px 22px;gap:18px}
+}

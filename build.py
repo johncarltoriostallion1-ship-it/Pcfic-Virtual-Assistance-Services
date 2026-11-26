@@ -257,7 +257,7 @@ home = f'''<section class="hero">
 <div data-cms-partner-band></div>
 <section class="bg-sky">
   <div class="container">
-    <div class="section-head center reveal"><span class="eyebrow">What we do</span><h2>Two services. <span class="text-blue">One partner.</span></h2><p class="lead">Most small businesses juggle an accountant, a designer and a page manager. We bring it under one roof.</p></div>
+    <div class="section-head center reveal"><span class="eyebrow">What we do</span><h2>Three services. <span class="text-blue">One partner.</span></h2><p class="lead">Most small businesses juggle an accountant, a designer and a page manager. We bring it under one roof.</p></div>
     {SVC_CARDS}
   </div>
 </section>
