@@ -72,7 +72,7 @@
       grid.innerHTML = list.map(function (s) {
         var img = safeUrl(s.image_url);
         var media = img ? '<img src="' + esc(img) + '" alt="" loading="lazy">' : '<span class="lib-ic">' + (I[s.icon] || I.book || "") + "</span>";
-        return '<a class="lib-item reveal in' + (badge(s) ? " is-free" : "") + '" data-cat="' + esc(s.category) + '" href="' + page[s.category] + '">' +
+        return '<a class="lib-item reveal in' + (badge(s) ? " is-free" : "") + '" data-cat="' + esc(s.category) + '" href="' + (/video/i.test(s.title) ? "portfolio.html#videos" : page[s.category]) + '">' +
           '<span class="lib-media m-' + esc(s.category) + (img ? "" : " no-img") + '">' + media + '<span class="tag">' + tag[s.category] + "</span>" +
           (badge(s) ? '<span class="lib-badge">' + esc(badge(s)) + "</span>" : "") + "</span>" +
           '<span class="lib-body"><h3>' + esc(s.title) + "</h3><p>" + esc(s.description) + "</p>" +
@@ -170,7 +170,7 @@
     $$("[data-cms-others]").forEach(function (el) {
       var others = withWork.filter(function (c) { return !c.show_on_clients; });
       el.innerHTML = others.map(function (c) {
-        return '<a href="social-media.html#brand-' + esc(c.slug) + '">' + esc(c.name) + "</a>";
+        return '<a href="portfolio.html#brand-' + esc(c.slug) + '">' + esc(c.name) + "</a>";
       }).join("");
       var sec = el.closest("section");
       if (sec) sec.style.display = others.length ? "" : "none";
@@ -235,6 +235,35 @@
     document.title = c.name + " | Client Work | PCFIC Virtual Assistance Services";
   }
 
+  // ---------------- videos (Google Drive) ----------------
+  var PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>';
+  var vslug = function (n) { return "v-" + String(n).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
+  function applyVideos(list) {
+    var grid = document.querySelector("[data-cms-videos]");
+    if (!grid) return;
+    list = list.filter(function (v) { return /^[\w-]{10,}$/.test(v.drive_id || ""); });
+    var sec = grid.closest("section");
+    if (sec) sec.style.display = list.length ? "" : "none";
+    grid.innerHTML = list.map(function (v) {
+      var id = esc(v.drive_id);
+      return '<button type="button" class="vid reveal in" data-cat="' + esc(vslug(v.client)) + '" data-vid="' + id + '" aria-label="Play ' + esc(v.client) + ": " + esc(v.title) + '">' +
+        '<span class="vid-thumb"><img src="assets/img/videos/' + id + '.jpg" alt="" loading="lazy">' +
+        '<span class="vid-play">' + PLAY + '</span><span class="vid-badge">Video</span></span>' +
+        '<span class="vid-info"><small>' + esc(v.client) + "</small><b>" + esc(v.title) + "</b></span></button>";
+    }).join("");
+    var seen = {};
+    var clients = list.map(function (v) { return v.client; }).filter(function (c) { return c && !seen[c] && (seen[c] = 1); });
+    $$("[data-cms-video-chips]").forEach(function (el) {
+      el.innerHTML = '<button class="chip active" data-filter="all">All videos</button>' + clients.map(function (c) {
+        return '<button class="chip" data-filter="' + esc(vslug(c)) + '">' + esc(c) + "</button>";
+      }).join("");
+      el.style.display = clients.length > 1 ? "" : "none";
+    });
+    grid.classList.remove("expanded");
+    if (window.limitGrid) window.limitGrid("vids");
+  }
+
+  get("videos?select=*&order=sort_order.asc,created_at.asc").then(applyVideos).catch(function () {});
   get("settings?select=key,value").then(applySettings).catch(function () {});
   get("services?select=*&order=sort_order.asc,created_at.asc").then(applyServices).catch(function () {});
   get("clients?select=*&order=sort_order.asc,created_at.asc").then(applyClients).catch(function () {

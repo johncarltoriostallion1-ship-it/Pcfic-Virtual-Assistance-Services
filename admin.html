@@ -75,6 +75,13 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
 .svc .media{display:flex;gap:12px;align-items:center;margin-top:10px}
 .svc .media .th{width:96px;height:60px;border-radius:8px;background:#e8eefc center/cover no-repeat;border:1px solid var(--line);flex-shrink:0;display:grid;place-items:center;font-size:.7rem;color:#7a879e}
 .svc .media .grow{flex:1}
+.vadd{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:18px;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.vrow{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px;background:var(--sky2)}
+.vrow img{width:64px;height:80px;object-fit:cover;border-radius:8px;background:#dfe6f5;flex-shrink:0}
+.vrow .f{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vrow .f input{margin:0}
+.vrow.dirty{border-color:var(--blue)}
+@media(max-width:640px){.vadd,.vrow .f{grid-template-columns:1fr}.vrow{flex-wrap:wrap}}
 .tabs{display:flex;gap:6px;margin-bottom:14px}
 .tab{padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:.75rem;cursor:pointer}
 .tab.on{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -114,6 +121,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
     <button class="on" data-view="clients">Clients</button>
     <button data-view="contact">Contact &amp; Home</button>
     <button data-view="services">Services</button>
+    <button data-view="videos">Videos</button>
   </nav>
 
   <main>
@@ -179,9 +187,9 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       <div class="head" style="margin:26px 0 0"><h2>Homepage heading</h2></div>
       <p class="hint" style="margin-top:-8px">The big text at the top of the home page.</p>
       <div class="grid2">
-        <div><label for="s-hero_line1">Heading line 1</label><input id="s-hero_line1" data-key="hero_line1" placeholder="Stop the scroll."></div>
-        <div><label for="s-hero_line2">Heading line 2</label><input id="s-hero_line2" data-key="hero_line2" placeholder="Grow your brand."></div>
-        <div><label for="s-hero_line3">Heading line 3 (blue)</label><input id="s-hero_line3" data-key="hero_line3" placeholder="Island grown."></div>
+        <div><label for="s-hero_line1">Heading line 1</label><input id="s-hero_line1" data-key="hero_line1" placeholder="Your time matters."></div>
+        <div><label for="s-hero_line2">Heading line 2</label><input id="s-hero_line2" data-key="hero_line2" placeholder="Get noticed."></div>
+        <div><label for="s-hero_line3">Heading line 3 (blue)</label><input id="s-hero_line3" data-key="hero_line3" placeholder="Focused on your business."></div>
       </div>
       <label for="s-hero_tagline">Subheading title</label><input id="s-hero_tagline" data-key="hero_tagline" placeholder="Your Partner in Digital Growth">
       <label for="s-hero_lead">Subheading text</label><textarea id="s-hero_lead" data-key="hero_lead"></textarea>
@@ -199,6 +207,19 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       </div>
       <div id="svc-list"></div>
       <input type="file" id="svc-img-file" accept="image/*" class="hidden">
+    </section>
+
+    <!-- VIDEOS -->
+    <section class="card hidden" id="v-videos">
+      <div class="head"><h2>Videos</h2></div>
+      <p class="hint" style="margin-top:-8px">Shown in the Video library on the Services page. Upload the video to Google Drive, set sharing to <b>Anyone with the link</b>, then paste the link here.</p>
+      <div class="vadd">
+        <div><label for="vid-link">Google Drive link</label><input id="vid-link" placeholder="https://drive.google.com/file/d/.../view"></div>
+        <div><label for="vid-client">Client</label><input id="vid-client" placeholder="e.g. Upkey Aesthetics"></div>
+        <div><label for="vid-title">Title</label><input id="vid-title" placeholder="e.g. Treatment Reel"></div>
+        <button class="btn" id="vid-add">+ Add video</button>
+      </div>
+      <div id="vid-list"></div>
     </section>
   </main>
 </div>
@@ -234,7 +255,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       return;
     }
     $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
-    loadClients(); loadSettings(); loadServices();
+    loadClients(); loadSettings(); loadServices(); loadVideos();
   }
   $("#login-form").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -249,7 +270,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
 
   // ================= VIEWS =================
   function view(name) {
-    ["clients", "edit", "contact", "services"].forEach(function (v) { $("#v-" + v).classList.toggle("hidden", v !== name); });
+    ["clients", "edit", "contact", "services", "videos"].forEach(function (v) { $("#v-" + v).classList.toggle("hidden", v !== name); });
     var tab = name === "edit" ? "clients" : name;
     document.querySelectorAll("#nav button").forEach(function (b) { b.classList.toggle("on", b.dataset.view === tab); });
     window.scrollTo(0, 0);
@@ -527,6 +548,67 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       s.image_url = url; renderServices(); toast("Picture saved");
     } catch (err) { toast(err.message, true); }
   });
+  // ================= VIDEOS =================
+  var videos = [];
+  function driveId(link) {
+    link = String(link || "").trim();
+    var m = link.match(/\/d\/([\w-]{10,})/) || link.match(/[?&]id=([\w-]{10,})/) || link.match(/^([\w-]{20,})$/);
+    return m ? m[1] : "";
+  }
+  async function loadVideos() {
+    var r = await sb.from("videos").select("*").order("sort_order").order("created_at");
+    if (r.error) { $("#vid-list").innerHTML = '<p class="empty">Video library is not set up yet: run supabase/videos.sql once.</p>'; return; }
+    videos = r.data; renderVideos();
+  }
+  function renderVideos() {
+    $("#vid-list").innerHTML = videos.length ? videos.map(function (v, i) {
+      return '<div class="vrow" data-id="' + v.id + '"><img src="https://drive.google.com/thumbnail?id=' + esc(v.drive_id) + '&sz=w200" alt="">' +
+        '<div class="f"><input data-f="client" value="' + esc(v.client) + '" placeholder="Client"><input data-f="title" value="' + esc(v.title) + '" placeholder="Title"></div>' +
+        '<a class="btn ghost sm" href="https://drive.google.com/file/d/' + esc(v.drive_id) + '/view" target="_blank" rel="noopener">Open</a>' +
+        '<button class="btn ghost sm" data-act="up"' + (i === 0 ? " disabled" : "") + '>↑</button>' +
+        '<button class="btn ghost sm" data-act="down"' + (i === videos.length - 1 ? " disabled" : "") + '>↓</button>' +
+        '<button class="btn sm" data-act="save">Save</button><button class="btn danger sm" data-act="del">Delete</button></div>';
+    }).join("") : '<p class="empty">No videos yet.</p>';
+  }
+  $("#vid-add").addEventListener("click", async function () {
+    var id = driveId($("#vid-link").value);
+    if (!id) return toast("Paste a Google Drive file link", true);
+    var max = videos.reduce(function (m, x) { return Math.max(m, x.sort_order); }, 0);
+    this.disabled = true;
+    var r = await sb.from("videos").insert({ drive_id: id, client: $("#vid-client").value.trim(), title: $("#vid-title").value.trim(), sort_order: max + 10 }).select().single();
+    this.disabled = false;
+    if (r.error) return toast("Could not add: " + r.error.message, true);
+    videos.push(r.data); renderVideos();
+    $("#vid-link").value = $("#vid-title").value = "";
+    toast("Video added");
+  });
+  $("#vid-list").addEventListener("input", function (e) { var row = e.target.closest(".vrow"); if (row) row.classList.add("dirty"); });
+  $("#vid-list").addEventListener("click", async function (e) {
+    var b = e.target.closest("[data-act]"); if (!b) return;
+    var row = b.closest(".vrow"), v = videos.find(function (x) { return x.id === row.dataset.id; }), act = b.dataset.act;
+    if (act === "save") {
+      var patch = {}; row.querySelectorAll("[data-f]").forEach(function (el) { patch[el.dataset.f] = el.value.trim(); });
+      var r = await sb.from("videos").update(patch).eq("id", v.id);
+      if (r.error) return toast("Save failed: " + r.error.message, true);
+      Object.assign(v, patch); row.classList.remove("dirty"); toast("Video saved");
+    }
+    if (act === "del") {
+      if (!confirm("Remove “" + (v.title || "this video") + "” from the website? (The file stays in Google Drive.)")) return;
+      var d = await sb.from("videos").delete().eq("id", v.id);
+      if (d.error) return toast("Delete failed: " + d.error.message, true);
+      videos = videos.filter(function (x) { return x.id !== v.id; }); renderVideos(); toast("Video removed");
+    }
+    if (act === "up" || act === "down") {
+      var i = videos.indexOf(v), o = videos[act === "up" ? i - 1 : i + 1]; if (!o) return;
+      var a = v.sort_order, c = o.sort_order; if (a === c) c = a + (act === "up" ? -1 : 1);
+      var r1 = await sb.from("videos").update({ sort_order: c }).eq("id", v.id);
+      var r2 = await sb.from("videos").update({ sort_order: a }).eq("id", o.id);
+      if (r1.error || r2.error) return toast("Could not reorder", true);
+      v.sort_order = c; o.sort_order = a;
+      videos.sort(function (x, y) { return x.sort_order - y.sort_order; }); renderVideos();
+    }
+  });
+
   $("#svc-add").addEventListener("click", async function () {
     var max = services.reduce(function (m, x) { return Math.max(m, x.sort_order); }, 0);
     var r = await sb.from("services").insert({ category: filter === "all" ? "accounting" : filter, title: "New service", description: "", icon: "book", sort_order: max + 10 }).select().single();

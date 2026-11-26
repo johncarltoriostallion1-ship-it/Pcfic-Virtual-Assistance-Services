@@ -34,26 +34,47 @@ document.addEventListener('click', e => {
   chip.classList.add('active');
   const f = chip.dataset.filter;
   if (target) target.querySelectorAll('[data-cat]').forEach(it => it.classList.toggle('hide', f !== 'all' && it.dataset.cat !== f));
-  if (target && target.id === 'lib') { target.classList.remove('expanded'); limitLib(); }
+  if (target && LIMITS[target.id]) { target.classList.remove('expanded'); limitGrid(target.id); }
 });
 
-// Service library: show 6 at first, then a "See more services" button
-window.limitLib = () => {
-  const lib = document.querySelector('#lib'); if (!lib) return;
-  let btn = document.querySelector('.lib-more');
-  if (!btn) {
+// Long grids: show the first few, then a "See more" button
+const LIMITS = { lib: [6, 'See more services'], vids: [8, 'See more videos'] };
+window.limitGrid = id => {
+  const grid = document.getElementById(id); if (!grid) return;
+  const [n, label] = LIMITS[id];
+  let btn = grid.nextElementSibling;
+  if (!btn || !btn.classList.contains('lib-more')) {
     btn = document.createElement('div'); btn.className = 'lib-more';
-    btn.innerHTML = '<button class="btn btn-primary" type="button">See more services</button>';
-    lib.after(btn);
-    btn.querySelector('button').addEventListener('click', () => { lib.classList.add('expanded'); limitLib(); });
+    btn.innerHTML = `<button class="btn btn-primary" type="button">${label}</button>`;
+    grid.after(btn);
+    btn.querySelector('button').addEventListener('click', () => { grid.classList.add('expanded'); limitGrid(id); });
   }
-  const shown = [...lib.querySelectorAll('.lib-item:not(.hide)')];
-  const open = lib.classList.contains('expanded');
-  shown.forEach((it, i) => it.classList.toggle('clip', !open && i >= 6));
-  lib.querySelectorAll('.lib-item.hide').forEach(it => it.classList.remove('clip'));
-  btn.hidden = open || shown.length <= 6;
+  const items = [...grid.querySelectorAll('[data-cat]')];
+  const shown = items.filter(it => !it.classList.contains('hide'));
+  const open = grid.classList.contains('expanded');
+  items.forEach(it => it.classList.remove('clip'));
+  shown.forEach((it, i) => it.classList.toggle('clip', !open && i >= n));
+  btn.hidden = open || shown.length <= n;
 };
-limitLib();
+window.limitLib = () => limitGrid('lib');
+Object.keys(LIMITS).forEach(limitGrid);
+
+// Video library: play a Google Drive video in a pop-up
+const vm = document.querySelector('.vid-modal');
+if (vm) {
+  const frame = vm.querySelector('.vid-frame'), cap = vm.querySelector('.vid-cap');
+  const close = () => { vm.classList.remove('open'); frame.innerHTML = ''; document.documentElement.classList.remove('vid-lock'); };
+  document.addEventListener('click', e => {
+    const v = e.target.closest('[data-vid]'); if (!v) return;
+    const id = encodeURIComponent(v.dataset.vid);
+    frame.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" allow="autoplay; fullscreen" allowfullscreen title="Video"></iframe>`;
+    cap.textContent = v.querySelector('.vid-info')?.innerText.replace(/\n+/, ' · ') || '';
+    vm.classList.add('open'); document.documentElement.classList.add('vid-lock');
+  });
+  vm.querySelector('.vid-close').onclick = close;
+  vm.addEventListener('click', e => { if (e.target === vm) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && vm.classList.contains('open')) close(); });
+}
 
 // Portfolio: placeholder when an image is missing (also for images added later)
 window.markMissingWork = (root = document) => root.querySelectorAll('.work img').forEach(img => {
@@ -111,7 +132,7 @@ if (matchMedia('(hover:hover)').matches) {
   });
 }
 
-// Deep-link a brand filter on the portfolio: social-media.html#brand-hsp
+// Deep-link a brand filter on the portfolio: portfolio.html#brand-hsp
 window.applyBrandHash = () => {
   const h = location.hash.replace('#', '');
   if (!h.startsWith('brand-')) return;
@@ -134,3 +155,12 @@ document.querySelectorAll('.f2-av').forEach(function(img){
   function miss(){ img.setAttribute('data-missing',''); }
   if (img.complete && img.naturalWidth === 0) miss(); else img.addEventListener('error', miss);
 });
+
+// Video thumbnails: our saved frame first, then Google Drive's own thumbnail, then a plain colour tile
+document.addEventListener('error', e => {
+  const img = e.target;
+  if (!(img instanceof HTMLImageElement) || !img.closest('.vid-thumb')) return;
+  const id = img.closest('[data-vid]')?.dataset.vid;
+  if (id && !img.dataset.fb) { img.dataset.fb = '1'; img.src = `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w640`; }
+  else img.remove();
+}, true);
