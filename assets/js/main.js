@@ -34,7 +34,26 @@ document.addEventListener('click', e => {
   chip.classList.add('active');
   const f = chip.dataset.filter;
   if (target) target.querySelectorAll('[data-cat]').forEach(it => it.classList.toggle('hide', f !== 'all' && it.dataset.cat !== f));
+  if (target && target.id === 'lib') { target.classList.remove('expanded'); limitLib(); }
 });
+
+// Service library: show 6 at first, then a "See more services" button
+window.limitLib = () => {
+  const lib = document.querySelector('#lib'); if (!lib) return;
+  let btn = document.querySelector('.lib-more');
+  if (!btn) {
+    btn = document.createElement('div'); btn.className = 'lib-more';
+    btn.innerHTML = '<button class="btn btn-primary" type="button">See more services</button>';
+    lib.after(btn);
+    btn.querySelector('button').addEventListener('click', () => { lib.classList.add('expanded'); limitLib(); });
+  }
+  const shown = [...lib.querySelectorAll('.lib-item:not(.hide)')];
+  const open = lib.classList.contains('expanded');
+  shown.forEach((it, i) => it.classList.toggle('clip', !open && i >= 6));
+  lib.querySelectorAll('.lib-item.hide').forEach(it => it.classList.remove('clip'));
+  btn.hidden = open || shown.length <= 6;
+};
+limitLib();
 
 // Portfolio: placeholder when an image is missing (also for images added later)
 window.markMissingWork = (root = document) => root.querySelectorAll('.work img').forEach(img => {

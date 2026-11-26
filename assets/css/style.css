@@ -852,3 +852,34 @@ p{color:var(--muted)}
   .lib-body{padding:20px}
 }
 .lib-item.is-free .lib-media.no-img{background:linear-gradient(135deg,#FF9A1F 0%,#E2531B 45%,#0A1B3D 100%)}
+
+/* Library v2: slim header for cards without a picture + real "Learn more" button */
+.lib-media.no-img{aspect-ratio:auto;height:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;justify-content:flex-start}
+.lib-media.no-img::after{display:none}
+.lib-media.no-img .lib-ic{width:48px;height:48px;border-radius:14px;order:2;margin-left:auto}
+.lib-media.no-img .lib-ic svg{width:24px;height:24px}
+.lib-item .lib-media.no-img .tag{position:static;box-shadow:none}
+.lib-media.no-img .lib-badge{position:static}
+.lib-media.no-img:has(.lib-badge) .tag{display:none}
+.lib-item .more{align-self:flex-start;padding:11px 20px;border-radius:999px;background:var(--sky);color:var(--blue);transition:background .3s,color .3s}
+.lib-item:hover .more{background:var(--blue);color:#fff}
+.lib-item.is-free .more{background:linear-gradient(135deg,#FFB020,#FF7A00);color:#fff}
+.lib-grid{align-items:stretch}
+.lib-item .more{margin-top:auto}
+.lib-item .lib-body p{margin-bottom:18px}
+.lib-item.clip{display:none}
+.lib-more{text-align:center;margin-top:34px}
+.lib-more[hidden]{display:none}
+
+/* Hero: tagline above the subheading */
+.hero .hero-tag{color:#fff;font-size:clamp(1.15rem,2vw,1.5rem);font-weight:700;letter-spacing:-.01em;margin:-10px auto 12px;text-shadow:0 4px 18px rgba(0,10,40,.45)}
+.hero .hero-tag::after{content:"";display:block;width:56px;height:3px;border-radius:3px;margin:12px auto 0;background:linear-gradient(90deg,#7FB0FF,#fff)}
+.hero .lead{text-shadow:0 2px 12px rgba(0,10,40,.45)}
+
+/* Logo seal: a bit bigger, and the ring always turns (also on PCs with animations turned off) */
+.seal{width:164px;height:164px}
+.seal-mark{width:100px;height:100px}
+.seal-ring text{font-size:12.5px}
+.seal-ring{animation:spin 26s linear infinite}
+@media (prefers-reduced-motion:reduce){.seal-ring{animation:spin 26s linear infinite!important}}
+@media (max-width:700px){.seal{width:136px;height:136px}.seal-mark{width:82px;height:82px}}
