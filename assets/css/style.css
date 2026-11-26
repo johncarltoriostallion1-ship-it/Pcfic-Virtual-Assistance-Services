@@ -1051,3 +1051,47 @@ html.vid-lock{overflow:hidden}
 @media (min-width:901px){.footer-bottom{padding-right:96px}}
 .svc-band .svc-grid{position:relative}
 .work.clip{display:none}
+
+/* Facebook band: centered text only */
+.fb-solo{position:relative;z-index:1;max-width:820px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.fb-solo .eyebrow{justify-content:center}
+.fb-solo .lead{max-width:600px;margin:0 auto}
+.fb-mark{width:68px;height:68px;border-radius:20px;display:grid;place-items:center;margin-bottom:22px;background:linear-gradient(135deg,#1877F2,#0A5BD8);color:#fff;box-shadow:0 18px 40px -14px rgba(24,119,242,.8)}
+.fb-mark svg{width:32px;height:32px}
+.fb-solo .fb-points{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:30px 0 36px}
+.fb-solo .fb-points li{padding:8px 16px 8px 8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;font-size:.88rem}
+.fb-solo .fb-points svg{width:30px;height:30px;padding:7px;border-radius:50%;background:rgba(141,182,255,.18);color:#8DB6FF}
+@media (max-width:700px){.fb-mark{width:56px;height:56px;border-radius:16px}.fb-solo .fb-points li{font-size:.82rem}}
+
+/* ===================== Mobile polish (all pages) ===================== */
+@media (max-width:700px){
+  /* footer: room for the floating WhatsApp button */
+  .footer{padding-bottom:84px}
+  .footer-bottom{padding-right:0}
+  /* filter chips: one swipeable row instead of many stacked rows */
+  .lib-filter{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    margin:0 -4vw 30px;padding:4px 4vw 8px;scroll-padding-inline:4vw;scroll-snap-type:x proximity;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 28px),transparent)}
+  .lib-filter::-webkit-scrollbar{display:none}
+  .lib-filter .chip{flex:0 0 auto;white-space:nowrap;scroll-snap-align:start}
+  /* feature / value cards: icon on the left, much shorter */
+  .feat{display:grid;grid-template-columns:48px 1fr;column-gap:16px;align-items:start;padding:22px 20px}
+  .feat .ic{width:48px;height:48px;border-radius:14px;margin:0;grid-row:span 2}
+  .feat .ic svg{width:22px;height:22px}
+  .feat h3{font-size:1.02rem;margin:2px 0 6px}
+  .feat p{font-size:.9rem;margin:0}
+  .feat-grid{gap:12px}
+  .about-band .values{margin-top:36px}
+  /* how it works: compact */
+  .step{padding:20px 20px 20px 84px;min-height:0}
+  .step::before{position:absolute;left:20px;top:20px;width:46px;height:46px;margin:0}
+  .step h3{font-size:1rem;margin-bottom:4px}
+  .step p{font-size:.9rem;margin:0}
+  .steps{gap:12px}
+  /* home featured work: 4 is enough on a phone */
+  .work-band .feat-work>*:nth-child(n+5){display:none}
+  /* section spacing */
+  section{padding:72px 0}
+  .section-head{margin-bottom:34px}
+}
+@media (max-width:700px){.split .steps{grid-template-columns:1fr!important}}
