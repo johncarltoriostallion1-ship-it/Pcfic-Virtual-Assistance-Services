@@ -71,15 +71,7 @@ def header(active):
     for href, label in [("index.html", "Home"), ("services.html", "Services"), ("clients.html", "Clients"), ("about.html", "About"), ("contact.html", "Contact")]:
         on = href == active or (href == "services.html" and active in SVC_PAGES) or (href == "clients.html" and active.startswith("client-"))
         cls = ' class="active"' if on else ""
-        if href == "services.html":
-            links.append(f'''<div class="dropdown"><a href="services.html"{cls}>Services</a>
-        <div class="dropdown-menu">
-          <a href="accounting.html"><span class="ic">{I["calc"]}</span><div><b>Accounting Services</b><span>Books, payroll & tax-ready reports</span></div></a>
-          <a href="social-media.html"><span class="ic">{I["social"]}</span><div><b>Social Media Services</b><span>Content, design & ads that convert</span></div></a>
-          <a href="services.html"><span class="ic">{I["book"]}</span><div><b>Service Library</b><span>Browse everything we offer</span></div></a>
-        </div></div>''')
-        else:
-            links.append(f'<a href="{href}"{cls}>{label}</a>')
+        links.append(f'<a href="{href}"{cls}>{label}</a>')
     return f'''<header class="header">
   <div class="container">
     <a href="index.html" class="brand" aria-label="{BRAND_FULL} home"><span class="brand-logo"><img src="assets/img/logo-pcfic-sm.png" alt="{BRAND} logo"></span><span class="brand-text"><strong>{BRAND}</strong><small>{TAGLINE}</small></span></a>
@@ -185,7 +177,7 @@ PROOF = f'''<section class="proof">
   </div>
 </section>'''
 
-SVC_CARDS = f'''<div class="svc-grid">
+SVC_CARDS = f'''<div class="svc-grid three">
   <a href="accounting.html" class="svc-card reveal">
     <span class="num">01</span><div class="ic">{I["calc"]}</div>
     <h3>Accounting Services</h3>
@@ -199,6 +191,13 @@ SVC_CARDS = f'''<div class="svc-grid">
     <p>Scroll-stopping content, consistent posting and ads that bring real customers through your door.</p>
     <ul data-svc-list="social"><li>Content calendar</li><li>Graphic design</li><li>Copywriting</li><li>Page management</li><li>Paid ads</li><li>Monthly reports</li></ul>
     <span class="btn btn-white">Explore social media {I["arrow"]}</span>
+  </a>
+  <a href="services.html#svc-creative" class="svc-card reveal d3">
+    <span class="num">03</span><div class="ic">{I["web"]}</div>
+    <h3>Web &amp; Creative</h3>
+    <p>Websites, logos and videos that make your brand look professional everywhere customers find you.</p>
+    <ul data-svc-list="creative"><li>Website development</li><li>Professional logo design</li><li>Video editing</li></ul>
+    <span class="btn btn-primary">See web &amp; creative {I["arrow"]}</span>
   </a>
 </div>'''
 
@@ -268,7 +267,7 @@ home = f'''<section class="hero">
     <div class="stat reveal"><b><span data-count="{len(CLIENTS)}" data-cms-stat="clients">0</span><em>+</em></b><span class="lbl">Business clients</span></div>
     <div class="stat reveal d1"><b><span data-count="{len(WORK)}" data-cms-stat="designs">0</span><em>+</em></b><span class="lbl">Social designs delivered</span></div>
     <div class="stat reveal d2"><b><span data-count="{len(BRANDS)}" data-cms-stat="brands">0</span></b><span class="lbl">Brands in our portfolio</span></div>
-    <div class="stat reveal d3"><b><span data-count="2">0</span></b><span class="lbl">Core services, one team</span></div>
+    <div class="stat reveal d3"><b><span data-count="3">0</span></b><span class="lbl">Service areas, one team</span></div>
   </div>
 </section>
 <section>
@@ -333,15 +332,19 @@ LIB = [
  ("social", "Social Media", "Page Management", "Consistent posting plus replies to comments and messages on your pages."),
  ("social", "Social Media", "Paid Ads", "Targeted Facebook & Instagram ads that reach customers in Guam."),
  ("social", "Social Media", "Monthly Reports", "Reach, engagement and leads — what worked and what we'll do next."),
+ ("creative", "Web & Creative", "Website Development", "Fast, mobile-friendly websites that turn visitors into inquiries and bookings."),
+ ("creative", "Web & Creative", "Professional Logo Design", "A clean, memorable logo and brand look that makes your business stand out."),
+ ("creative", "Web & Creative", "Video Editing", "Short videos and reels edited for Facebook, Instagram and TikTok."),
 ]
-lib_items = "".join(f'''<a class="lib-item reveal" data-cat="{c}" href="{'accounting.html' if c=='accounting' else 'social-media.html'}">
-  <span class="tag">{t}</span><h3>{h}</h3><p>{p}</p><span class="more">Learn more {I["arrow"]}</span></a>''' for c, t, h, p in LIB)
-services = f'''{page_hero('<span>Services</span>', 'Service library', 'Everything we do, <em>in one place.</em>', 'Browse our full library of accounting and social media services. Each one can stand alone or be bundled into a monthly plan.')}
+SVC_HREF = {"accounting": "accounting.html", "social": "social-media.html", "creative": "contact.html"}
+lib_items = "".join(f'''<a class="lib-item reveal" data-cat="{c}" href="{SVC_HREF[c]}">
+  <span class="tag">{e(t)}</span><h3>{e(h)}</h3><p>{p}</p><span class="more">Learn more {I["arrow"]}</span></a>''' for c, t, h, p in LIB)
+services = f'''{page_hero('<span>Services</span>', 'Service library', 'Everything we do, <em>in one place.</em>', 'Browse our full library of accounting, social media, web and creative services. Each one can stand alone or be bundled into a monthly plan.')}
 <section><div class="container">{SVC_CARDS}</div></section>
 <section class="bg-sky">
   <div class="container">
     <div class="section-head center reveal"><span class="eyebrow">The library</span><h2>Browse by service</h2></div>
-    <div class="lib-filter" data-filter-group="#lib"><button class="chip active" data-filter="all">All services</button><button class="chip" data-filter="accounting">Accounting</button><button class="chip" data-filter="social">Social Media</button></div>
+    <div class="lib-filter" data-filter-group="#lib"><button class="chip active" data-filter="all">All services</button><button class="chip" data-filter="accounting">Accounting</button><button class="chip" data-filter="social">Social Media</button><button class="chip" data-filter="creative">Web &amp; Creative</button></div>
     <div class="lib-grid" id="lib" data-svc-lib>{lib_items}</div>
   </div>
 </section>

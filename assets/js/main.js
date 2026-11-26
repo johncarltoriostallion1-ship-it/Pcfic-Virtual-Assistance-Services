@@ -101,6 +101,15 @@ window.applyBrandHash = () => {
 };
 applyBrandHash(); window.addEventListener('hashchange', applyBrandHash);
 
+// Deep-link a service group in the library: services.html#svc-creative
+window.applySvcHash = () => {
+  const h = location.hash.replace('#', '');
+  if (!h.startsWith('svc-')) return;
+  const chip = document.querySelector(`[data-filter-group="#lib"] .chip[data-filter="${h.slice(4)}"]`);
+  if (chip) { chip.click(); document.querySelector('#lib')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+};
+applySvcHash(); window.addEventListener('hashchange', applySvcHash);
+
 /* Founder avatars: show the icon until the photo file exists */
 document.querySelectorAll('.f2-av').forEach(function(img){
   function miss(){ img.setAttribute('data-missing',''); }

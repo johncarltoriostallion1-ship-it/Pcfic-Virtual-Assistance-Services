@@ -56,8 +56,8 @@
   // ---------------- services ----------------
   function applyServices(list) {
     if (!list.length) return;
-    var tag = { accounting: "Accounting", social: "Social Media" };
-    var page = { accounting: "accounting.html", social: "social-media.html" };
+    var tag = { accounting: "Accounting", social: "Social Media", creative: "Web &amp; Creative" };
+    var page = { accounting: "accounting.html", social: "social-media.html", creative: "contact.html" };
 
     $$("[data-svc-lib]").forEach(function (grid) {
       grid.innerHTML = list.map(function (s) {
@@ -67,6 +67,7 @@
       }).join("");
       var active = document.querySelector('[data-filter-group="#lib"] .chip.active');
       if (active) active.click();
+      if (window.applySvcHash) window.applySvcHash();
     });
 
     $$("[data-svc-feat]").forEach(function (grid) {

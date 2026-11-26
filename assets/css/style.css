@@ -753,3 +753,11 @@ p{color:var(--muted)}
 .footer-partner a{display:inline-flex;align-items:center;gap:10px;color:#fff;font-weight:700}
 .footer-partner img{width:30px;height:30px;object-fit:contain;border-radius:8px;background:#fff;padding:3px}
 @media (max-width:700px){.partner-banner{flex-direction:column;text-align:center}.partner-banner .btn{margin:0}.partner-band a{flex-wrap:wrap;border-radius:24px}.partner-pill{margin:10px 0 0}}
+
+/* ===== Three service cards ===== */
+.svc-grid.three{grid-template-columns:repeat(3,1fr);gap:24px}
+.svc-grid.three .svc-card{padding:38px 32px}
+.svc-grid.three .svc-card ul{grid-template-columns:1fr}
+.svc-grid.three .svc-card .num{right:28px}
+@media (max-width:1080px){.svc-grid.three{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.svc-grid.three{grid-template-columns:1fr}}

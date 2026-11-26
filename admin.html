@@ -183,6 +183,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
         <button class="tab on" data-cat="all">All</button>
         <button class="tab" data-cat="accounting">Accounting</button>
         <button class="tab" data-cat="social">Social Media</button>
+        <button class="tab" data-cat="creative">Web &amp; Creative</button>
       </div>
       <div id="svc-list"></div>
     </section>
@@ -435,7 +436,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
   // ================= SERVICES =================
   var ICONS = { book: "Book", users: "People", chart: "Chart", file: "Document", card: "Card", calc: "Calculator",
                 cal: "Calendar", pen: "Pen", social: "Social", target: "Target", video: "Video", web: "Website" };
-  var CATS = { accounting: "Accounting", social: "Social Media" };
+  var CATS = { accounting: "Accounting", social: "Social Media", creative: "Web & Creative" };
   var services = [], filter = "all";
   function opts(map, sel) { return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (k === sel ? " selected" : "") + ">" + map[k] + "</option>"; }).join(""); }
 
@@ -495,7 +496,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
   });
   $("#svc-add").addEventListener("click", async function () {
     var max = services.reduce(function (m, x) { return Math.max(m, x.sort_order); }, 0);
-    var r = await sb.from("services").insert({ category: filter === "social" ? "social" : "accounting", title: "New service", description: "", icon: "book", sort_order: max + 10 }).select().single();
+    var r = await sb.from("services").insert({ category: filter === "all" ? "accounting" : filter, title: "New service", description: "", icon: "book", sort_order: max + 10 }).select().single();
     if (r.error) return toast("Could not add: " + r.error.message, true);
     services.push(r.data); renderServices();
     var last = $("#svc-list").lastElementChild; if (last) { last.scrollIntoView({ behavior: "smooth", block: "center" }); last.querySelector("input").select(); }
