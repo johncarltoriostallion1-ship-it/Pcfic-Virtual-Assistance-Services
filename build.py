@@ -16,7 +16,7 @@ EMAIL = "pcficvaservices@gmail.com"
 LOCATION = "Tamuning, Guam"
 FB_URL = "https://www.facebook.com/PacificVirtualAssistanceServ"
 OWNER_1 = ("Jimmy Barriga", "Co-Founder · Accounting Lead")
-OWNER_2 = ("Janna Sulit", "Co-Founder · Creative & Social Lead")
+OWNER_2 = ("Janna Amarante", "Co-Founder · Creative & Social Lead")
 
 # Clients with logos -> each gets its own page: client-<slug>.html
 CLIENTS = [
@@ -109,6 +109,7 @@ def footer():
       <div><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="clients.html">Our Clients</a></li><li><a href="contact.html">Contact</a></li></ul></div>
       <div><h4>Get in touch</h4><ul><li><a href="{WA}" {BLANK}>WhatsApp: <span data-cms="whatsapp_display">{WA_DISPLAY}</span></a></li><li><a href="mailto:{EMAIL}" data-cms-mail><span data-cms="email">{EMAIL}</span></a></li><li>{LOCATION}</li></ul></div>
     </div>
+    <div class="footer-partner" data-cms-partners hidden></div>
     <div class="footer-bottom"><span>© <span data-year></span> {BRAND_FULL}. All rights reserved.</span><span>Serving Guam & the Pacific</span></div>
   </div>
 </footer>
@@ -254,6 +255,7 @@ home = f'''<section class="hero">
   <a class="scroll-cue" href="#work-band" aria-label="Scroll down"></a>
 </section>
 {logo_marquee()}
+<div data-cms-partner-band></div>
 <section class="bg-sky">
   <div class="container">
     <div class="section-head center reveal"><span class="eyebrow">What we do</span><h2>Two services. <span class="text-blue">One partner.</span></h2><p class="lead">Most small businesses juggle an accountant, a designer and a page manager. We bring it under one roof.</p></div>

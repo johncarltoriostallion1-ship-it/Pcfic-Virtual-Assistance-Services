@@ -107,8 +107,8 @@
 
     $$("[data-cms-medals]").forEach(function (el) {
       el.innerHTML = shown.map(function (c) {
-        return '<a class="medal reveal in" href="' + link(c) + '" aria-label="See our work for ' + esc(c.name) + '">' +
-          '<span class="tile">' + logoImg(c) + '</span><span class="floor"></span>' +
+        return '<a class="medal reveal in' + (c.is_partner ? " is-partner" : "") + '" href="' + link(c) + '" aria-label="See our work for ' + esc(c.name) + '">' +
+          '<span class="tile">' + (c.is_partner ? '<span class="partner-badge">★ Partner</span>' : "") + logoImg(c) + '</span><span class="floor"></span>' +
           '<span class="name">' + esc(short(c)) + '<span class="view">View work →</span></span></a>';
       }).join("");
     });
@@ -152,6 +152,22 @@
       if (sec) sec.style.display = others.length ? "" : "none";
     });
 
+    // Partners: strip on the home page + line in the footer
+    var partners = all.filter(function (c) { return c.is_partner; });
+    var plabel = function (c) { return c.partner_label || "Official Partner"; };
+    $$("[data-cms-partner-band]").forEach(function (el) {
+      el.innerHTML = partners.length ? '<section class="partner-band"><div class="container">' + partners.map(function (c) {
+        return '<a href="' + link(c) + '">' + (safeUrl(c.logo_url) ? '<img src="' + esc(c.logo_url) + '" alt="">' : "") +
+          '<span class="lbl">Partnered with</span><b>' + esc(c.name) + '</b><span class="tag">★ ' + esc(plabel(c)) + "</span></a>";
+      }).join("") + "</div></section>" : "";
+    });
+    $$("[data-cms-partners]").forEach(function (el) {
+      el.hidden = !partners.length;
+      el.innerHTML = partners.length ? "<span>In partnership with</span>" + partners.map(function (c) {
+        return '<a href="' + link(c) + '">' + (safeUrl(c.logo_url) ? '<img src="' + esc(c.logo_url) + '" alt="">' : "") + esc(c.name) + "</a>";
+      }).join("<span>·</span>") : "";
+    });
+
     var main = document.querySelector("main[data-client]");
     if (main) renderClientPage(main, all, shown);
 
@@ -181,8 +197,13 @@
     main.innerHTML =
       '<section class="ph" style="--curve:#F5F8FF"><div class="ph-glow" aria-hidden="true"></div><div class="container ph-in">' +
         '<span class="ch-logo">' + logoImg(c) + '</span><span class="ph-pill"><span class="dot"></span>' + (esc(meta) || "Client spotlight") + "</span>" +
+        (c.is_partner ? '<span class="partner-pill">★ ' + esc(c.partner_label || "Official Partner") + "</span>" : "") +
         "<h1>" + esc(c.name) + '</h1><p class="lead">' + sub + '</p></div><div class="ph-curve" aria-hidden="true"></div></section>' +
-      '<section class="ch-work" id="work"><div class="container"><div class="ch-head"><h2>Work for ' + esc(short(c)) + '</h2><div class="svc-tags small">' + tags + "</div></div>" + gallery + "</div></section>" +
+      '<section class="ch-work" id="work"><div class="container"><div class="ch-head"><h2>Work for ' + esc(short(c)) + '</h2><div class="svc-tags small">' + tags + "</div></div>" + gallery +
+        (c.is_partner ? '<div class="partner-banner reveal in"><span class="pb-logo">' + logoImg(c, "") + "</span><div><small>★ " + esc(c.partner_label || "Official Partner") +
+          "</small><h3>Partnered with " + esc(c.name) + "</h3><p>We're proud to work hand in hand with " + esc(short(c)) + " to help businesses grow.</p></div>" +
+          (site ? '<a class="btn btn-white" href="' + esc(site) + '"' + BLANK + ">Visit " + esc(short(c)) + " " + (I.out || "") + "</a>" : "") + "</div>" : "") +
+        "</div></section>" +
       (ring.length > 1 ? '<section class="section-sm" style="padding-top:0"><div class="container client-nav">' +
         '<a href="' + link(prev) + '">' + logoImg(prev, "") + "<div><small>← Previous client</small><b>" + esc(short(prev)) + "</b></div></a>" +
         '<a class="next" href="' + link(next) + '"><div><small>Next client →</small><b>' + esc(short(next)) + "</b></div>" + logoImg(next, "") + "</a></div></section>" : "");

@@ -145,6 +145,8 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       <label for="ed-about">About the client</label><textarea id="ed-about"></textarea>
       <label for="ed-services">What we did for them (comma separated)</label><input id="ed-services" placeholder="Social media content, Graphic design">
       <div class="check"><input type="checkbox" id="ed-show"><label for="ed-show">Show on the Clients page (with logo)</label></div>
+      <div class="check"><input type="checkbox" id="ed-partner"><label for="ed-partner">Partner (gold badge, “Partnered with” banner, home page and footer)</label></div>
+      <div id="ed-plabel-wrap"><label for="ed-plabel">Partner label</label><input id="ed-plabel" placeholder="Official Partner"></div>
 
       <div class="head" style="margin:24px 0 0"><h2 style="font-size:.95rem">Work images <span class="hint" id="ed-count"></span></h2>
         <button class="btn ghost sm" id="ed-img-add">+ Add images</button>
@@ -272,6 +274,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       return '<div class="cl" data-id="' + c.id + '">' +
         '<div class="lg">' + (c.logo_url ? preview(c.logo_url) : esc(c.short_name || c.name).slice(0, 12)) + "</div>" +
         '<div class="nm"><b>' + esc(c.name) + "</b><small>" + n + " image" + (n === 1 ? "" : "s") + (c.industry ? " · " + esc(c.industry) : "") + "</small></div>" +
+        (c.is_partner ? '<span class="pill" style="background:#FFF4DB;color:#8A5A00">★ Partner</span>' : "") +
         '<span class="pill' + (c.show_on_clients ? "" : " off") + '">' + (c.show_on_clients ? "On Clients page" : "Portfolio only") + "</span>" +
         '<div class="bar">' +
           '<button class="btn ghost sm" data-act="up"' + (i === 0 ? " disabled" : "") + ">↑</button>" +
@@ -296,7 +299,7 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
 
   $("#cl-add").addEventListener("click", function () {
     openEditor({ id: null, slug: "", name: "", short_name: "", industry: "", location: "", about: "", website: "",
-                 services: [], logo_url: "", images: [], show_on_clients: true });
+                 services: [], logo_url: "", images: [], show_on_clients: true, is_partner: false, partner_label: "" });
   });
 
   function openEditor(c) {
@@ -305,10 +308,14 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
     $("#ed-name").value = cur.name; $("#ed-short").value = cur.short_name; $("#ed-industry").value = cur.industry;
     $("#ed-location").value = cur.location; $("#ed-website").value = cur.website; $("#ed-about").value = cur.about;
     $("#ed-services").value = (cur.services || []).join(", "); $("#ed-show").checked = !!cur.show_on_clients;
+    $("#ed-partner").checked = !!cur.is_partner; $("#ed-plabel").value = cur.partner_label || ""; togglePl();
     $("#ed-delete").classList.toggle("hidden", !c.id);
     drawLogo(); drawImages(); view("edit");
   }
   $("#v-edit").addEventListener("input", function () { dirty = true; });
+
+  function togglePl() { $("#ed-plabel-wrap").classList.toggle("hidden", !$("#ed-partner").checked); }
+  $("#ed-partner").addEventListener("change", togglePl);
 
   function drawLogo() { $("#ed-logo").innerHTML = cur.logo_url ? preview(cur.logo_url) : "No logo"; }
   function drawImages() {
@@ -378,7 +385,8 @@ main{max-width:960px;margin:auto;padding:18px 20px 90px}
       name: name, short_name: $("#ed-short").value.trim(), industry: $("#ed-industry").value.trim(),
       location: $("#ed-location").value.trim(), website: web, about: $("#ed-about").value.trim(),
       services: $("#ed-services").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean),
-      show_on_clients: $("#ed-show").checked, logo_url: cur.logo_url, images: cur.images
+      show_on_clients: $("#ed-show").checked, logo_url: cur.logo_url, images: cur.images,
+      is_partner: $("#ed-partner").checked, partner_label: $("#ed-plabel").value.trim()
     };
     this.disabled = true;
     var r;
